@@ -1,3 +1,7 @@
+---
+typora-root-url: ..\imgs
+---
+
 # Java
 
 ## java内存分配
@@ -20,15 +24,15 @@
 
 ## 示例过程
 
-![1](%E5%A2%9E%E5%BC%BAfor%E5%BE%AA%E7%8E%AF.assets/1.png)
+![1](https://raw.githubusercontent.com/skrdss/Notes/master/img/20210720092100.png)
 
 对象作为参数传递，实际上传递的是对象的地址
 
-![2](%E5%A2%9E%E5%BC%BAfor%E5%BE%AA%E7%8E%AF.assets/2.png)
+![2](https://raw.githubusercontent.com/skrdss/Notes/master/img/20210720092145.png)
 
 对象作为返回值，返回的还是地址值
 
-![3](%E5%A2%9E%E5%BC%BAfor%E5%BE%AA%E7%8E%AF.assets/3.png)
+![3](https://raw.githubusercontent.com/skrdss/Notes/master/img/20210720092204.png)
 
 ## 注意事项
 
@@ -141,7 +145,7 @@ String str2 = new String(by);
 System.out.println(str1 + "\n" + str2);
 ```
 
-![4](%E5%A2%9E%E5%BC%BAfor%E5%BE%AA%E7%8E%AF.assets/4.png)
+![4](https://raw.githubusercontent.com/skrdss/Notes/master/img/20210720092221.png)
 
 String 类型字符串比较,只有内容完全相同才会返回true：
 `str1.equals( str2 );`
@@ -184,7 +188,7 @@ static修饰成员方法，那么这个成员方法也不属于对象，而属�
 
 ​			2.静态方法中不能使用this,原因是this代表当前对象，通过谁调用的方法，谁就是当前对象。
 
-![5](%E5%A2%9E%E5%BC%BAfor%E5%BE%AA%E7%8E%AF.assets/5.png)
+![5](https://raw.githubusercontent.com/skrdss/Notes/master/img/20210720092236.png)
 
 静态代码块
 
@@ -305,7 +309,7 @@ public class Zi extends Fu{
 
 注意：子类method中有一个super.method(); 图中没有写出来
 
-![6](%E5%A2%9E%E5%BC%BAfor%E5%BE%AA%E7%8E%AF.assets/6.png)
+![6](https://raw.githubusercontent.com/skrdss/Notes/master/img/20210720092256.png)
 
 # 抽象方法
 
@@ -960,7 +964,7 @@ Iterator迭代器是一个接口，无法直接使用，需要使用该接口的
 
 * 原理
 
-  ![7](%E5%A2%9E%E5%BC%BAfor%E5%BE%AA%E7%8E%AF.assets/7.png)
+  ![7](https://raw.githubusercontent.com/skrdss/Notes/master/img/20210720092324.png)
 
 #  增强for循环
 
