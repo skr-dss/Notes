@@ -1,5 +1,6 @@
 ---
-typora-root-url: ..\imgs
+typora-root-url: ..\img
+typora-copy-images-to: upload
 ---
 
 # Java
@@ -1246,4 +1247,5 @@ List的数组实现，底层为数组
 
 哈希表 = 数组 + 链表 / 红黑树（当相同哈希值后的链表超过8位，就会把链表转为红黑树，用来提高查询速度）
 
-Set集合在调用`add（）`方法时，会调用元素的`hashCode()`方法和`epuals()`方法判断元素是否重复
+Set集合在调用`add（）`方法时，会调用元素的`hashCode()`方法和`epuals()`方法判断元素是否重复![屏幕截图 2021-07-20 093302](https://raw.githubusercontent.com/skrdss/Notes/master/img/20210720093321.png)
+
