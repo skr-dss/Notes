@@ -603,10 +603,10 @@ public void method(Employee e){
     			覆盖重写所有抽象方法
     		}；
     	形态1（匿名内部类）：
-    		`MyInterface objA = new MyInterface() {method1(){} };
+    		`MyInterface objA = new MyInterface() {method1(){ 方法实现 } };
     		objA.method1;`
     	形态2（既是匿名内部类，也是匿名对象）：
-    		`new MyInterface(){ method1(){} }.method1();`
+    		`new MyInterface(){ method1(){ 方法实现 } }.method1();`
     匿名内部类省略了类/子类名称，匿名对象省略了对象名称，二者不是一回事！！！
 
   ​	
@@ -894,6 +894,14 @@ System.out.println(Arrays.toString(dest));
   注意：Character类没有对应的pase方法，只有另外7类有
 
 # Collection集合
+
+## 单列集合体系结构
+
+![image-20210721171947304](https://raw.githubusercontent.com/skrdss/Notes/master/img/20210721171955.png)
+
+
+
+## 常用方法
 
 | boolean add(E e)      | 向集合中添加元素         |
 | --------------------- | ------------------------ |
@@ -1241,11 +1249,316 @@ List的数组实现，底层为数组
 
 无序，无索引，不允许存储重复元素
 
-### 哈希表
+**哈希表**
 
 `java.lang`包中的`Object`类中方法：`int hashCode()`返回对象的哈希码值
 
 哈希表 = 数组 + 链表 / 红黑树（当相同哈希值后的链表超过8位，就会把链表转为红黑树，用来提高查询速度）
 
 Set集合在调用`add（）`方法时，会调用元素的`hashCode()`方法和`epuals()`方法判断元素是否重复
+
+**HashSet存储自定义数据类型**
+
+需要重写对象中的hashCode方法和equals方法，建立自己的比较方式，才能保障HashSet集合中的对象唯一
+
+## LinkedHashSet
+
+`java.util.LinkedHashSet`
+
+`LinkedHashSet extends HashSet`
+
+LinkedHashSet集合特点：
+
+​	底层是一个哈希表（数组+链表/红黑树）+链表：多了一条链表记录元素的存储顺序，保证元素有序
+
+# 可变参数
+
+```java
+/*
+可变参数是JDK1.5后的新特性
+使用前提：
+	当方法的参数列表的数据类型已经确定，参数个数不确定时，可以使用可变参数
+原理：
+	可变参数底层是一个数组，根据传入参数个数的不同，会创建长度不同的数组来存储。参数个数可以是0，1，2...多个
+注意事项：
+	1.一个方法的参数列表，只能有一个可变参数
+	2.可变参数只能放在参数列表末尾
+*/
+public static void main(String[] args) {
+        int res = method1(1,2,3,4,5);
+        System.out.println(res);
+ }
+
+private static int method1(int ... arr) {
+        int sum = 0;
+        for (int i : arr) {
+            sum += i;
+        }
+        return sum;
+}
+
+//可变参数的特殊（终极）写法：可传入任意类型参数
+private static int method1(Object ... obj) 
+```
+
+# Collections——操作集合的工具类
+
+`java.util.Collections`是集合工具类，对集合进行操作
+
+`public static <T> boolean addAll(Collection<T> c,T...elementes)`往集合中添加多个元素
+
+`public static void shuffle(List<?> list)`打乱顺序
+
+`public static <T> void sort(List<T> list)`按照默认规则（升序）排序
+
+`public static <T> void sort(List<T> list，Comparator<? super T>)`将集合中元素按照指定规则排序
+
+```java
+        ArrayList<String> list = new ArrayList<>();
+        Collections.addAll(list,"a","b","c","d","e");
+        System.out.println(list);//[a, b, c, d, e]
+        Collections.shuffle(list);
+        System.out.println(list);//[c, b, a, d, e]
+        Collections.sort(list);
+        System.out.println(list);//[a, b, c, d, e]
+```
+
+
+
+**sort方法使用前提：**
+
+​	被排序的集合里面存储的元素，必须实现`Comparable`接口,并重写接口中的方法`compareTo`,定义排序的规则。
+
+```java
+/*
+Person类，实现Comparable接口，并重写compareTo
+*/
+
+public class Person  implements Comparable<Person>{
+    private int age;
+    private String name;
+
+    public Person() {
+    }
+
+    public Person(int age, String name) {
+        this.age = age;
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return "Person{" +
+                "age=" + age +
+                ", name='" + name + '\'' +
+                '}';
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+/*
+实现排序规则
+	this - 参数 ：实现升序
+	参数 - this ：实现降序
+*/
+    @Override
+    public int compareTo(Person o) {
+
+        return this.getAge() - o.getAge();
+    }
+}
+
+//实现排序
+import java.util.ArrayList;
+import java.util.Collections;
+
+public class Person_cmp {
+    public static void main(String[] args) {
+        ArrayList<Person> per = new ArrayList<>();
+        per.add(new Person(18,"A"));
+        per.add(new Person(17,"b"));
+        per.add(new Person(16,"C"));
+        System.out.println(per);//[Person{age=18, name='A'}, Person{age=17, name='b'}, Person{age=16, name='C'}]
+        Collections.sort(per);
+        System.out.println(per);//[Person{age=16, name='C'}, Person{age=17, name='b'}, Person{age=18, name='A'}]
+    }
+}
+```
+
+Comparator与Comparable两者都是接口类型，区别在于：
+
+​	Comparable：自己（this)和别人(参数)比较，自己需要实现Comparable接口，重写compareTo方法
+
+​	Comparator：相当于找一个第三方的裁判，比较两个
+
+```java
+/*
+不需要实现Comparable接口和重写compareTo方法，使用Comparator的匿名内部类实现排序规则
+*/
+Collections.sort(per, new Comparator<Person>() {
+            @Override
+            public int compare(Person o1, Person o2) {
+                return o1.getAge() - o2.getAge();
+            }
+        });
+```
+
+# Map集合
+
+Map集合和之前的Collection集合完全是两套体系，Collection集合是**单列集合**，Map集合是**双列集合**
+
+Collection集合中，元素是孤立的，Map集合中，元素是成对存在的，通过键可以找对应的值
+
+注意：1.Map中的集合不能包含重复的键，值可以重复
+
+​			2.Map中每个键只能对应一个值
+
+## Map集合的常用子类
+
+### HashMap<k,v>
+
+`java.util.HashMap<k,v>`集合 `implements Map<k,v>`接口
+
+特点：
+
+​	1.HashMap集合底层是哈希表，查询速度特别快
+
+​		JDK1.8之前：数组+单向链表
+
+​		JDK1.8之后：数组+单向链表/红黑树（链表长度超过8），提高查询速度
+
+​	2.HashMap集合是一个无序集合，存储元素和取出元素顺序可能不一样
+
+### LinkedHashMap<k,v>
+
+​	`java.util.LinkedHashMap<k,v>`集合 `extends HashMap<k,v>`集合
+
+​	特点：
+
+​		1.LinkedHashMap集合底层是哈希表+链表（保证迭代顺序）
+
+​		2.LinkedHashMap集合是一个有序的集合，存储元素和取出元素顺序是一样的
+
+## Map接口常用方法
+
+`public V put(K key,V value)`:返回值类型为V，如果key值集合中没有，返回的V为null，如果有，则替换key对应的value值，返回被替换的value值
+
+`public V get(Object key)`:返回key对应的value值,不存在返回null
+
+`public V remove(Object key)`:删除键值对，无则返回null
+
+`public boolean containValue(Object key)`:如果包含指定键的映射，返回true
+
+```java
+HashMap<String,Integer> map = new HashMap<>();
+map.put("a",98);
+map.put("b",98);
+System.out.println(map);//{a=98, b=98}
+Integer a = map.remove("b");//注意此处不能使用int，否则报空指针异常，因为int无法接收null,需要用到包装类
+System.out.println(map);//{a=98}
+Integer b = map.get("b");
+System.out.println(b);//null
+boolean cot = map.containsKey("a");
+System.out.println(cot);//true
+```
+
+
+
+### Map集合第一种遍历方式
+
+通过键找值的方式
+
+Map集合中的方法：
+
+* `public Set<K> keySet()`	返回此映射中**包含的键**的Set视图
+
+实现步骤：
+
+​	1.使用Map集合中的方法keySet(),把Map集合所有的key取出，存储到一个Set集合中
+
+​	2.遍历set集合，获取Map集合中的每一个key
+
+​	3.通过Map集合中的方法get(key)，通过key找到value
+
+```java
+    public static void main(String[] args) {
+        HashMap<String,Integer> map = new HashMap<>();
+        map.put("a",97);
+        map.put("b",98);
+        map.put("c",99);
+        Set<String> set = map.keySet();//利用keySet()获取key
+        for (String s : set) {
+            Integer value = map.get(s);
+            System.out.println(s+"="+value);
+        }
+
+    }
+}
+```
+
+### Entry键值对对象
+
+Entry将键值对的对应关系封装成了对象，即键值对对象。
+
+Entry同样提供了获取对应键和对应值的方法
+
+​	`public K getKey()`:获取Entry对象中的键
+
+​	`public V getValue()`:获取Entry对象中的值
+
+Map集合中也提供了获取所有Entry对象的方法：
+
+* `public Set<Map.Entry<K,V>> entrySet()`:获取到Map集合中所有的键值对对象的集合（Set集合）
+
+### Map集合遍历的第二种方式
+
+使用Entry对象遍历
+
+Map集合中的方法：
+
+​	`Set<Map.Entry<K,V>> entrySet()`	返回此映射中包含的映射关系的Set视图
+
+实现步骤：
+
+​	1.使用Map集合中的方法`entrySet(),`把Map集合中多个Entry对象取出来，存储到一个Set集合中
+
+​	2.遍历Set集合，获取每一个Entry对象
+
+​	3.使用Entry对象中的方法`getKey()`和`getValue()`获取键与值
+
+```java
+    public static void main(String[] args) {
+        HashMap<String,Integer> map = new HashMap<>();
+        map.put("a",97);
+        map.put("b",98);
+        map.put("c",99);
+        Set<Map.Entry<String,Integer>> set = map.entrySet();//Map.Entry<K,V>是通过 外部类.内部类名 方式访问的Entry对象
+        //迭代器
+        Iterator<Map.Entry<String,Integer>> it = set.iterator();
+        while(it.hasNext()){
+            Map.Entry<String,Integer> s = it.next();
+            System.out.println(s.getKey()+"="+s.getValue());
+        }
+        //增强for都可以
+        for (Map.Entry<String, Integer> s : set) {
+            String str = s.getKey();
+            Integer i = s.getValue();
+            System.out.println(str+"="+i);
+        }
+
+    }
+```
 
