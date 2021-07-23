@@ -590,14 +590,14 @@ public void method(Employee e){
 
   ​		3.方法运行结束后，立刻出栈，局部变量立刻消失
 
-  ​		4.但是new出来的对象会在堆当中持续存在，知道垃圾回收消失
+  ​		4.但是new出来的对象会在堆当中持续存在，直到垃圾回收消失
 
   ​		注：当方法执行结束后，局部变量从栈中消失，方法中new的对象使用的是局部变量的copy，在常量池中，但要保证局部变量不能变来变去
 
   
 
   * 匿名内部类
-    	如果接口的实现类只需要实现唯一的一次，那么可以省略该接口的实现类的定义，而使用匿名内部类
+    	如果接口的实现类只需要实现唯一的一次，那么可以**省略该接口的实现类的定义**，而使用匿名内部类
     	格式：
     		接口名称 对象名 = new 接口名称（）{
     			覆盖重写所有抽象方法
@@ -1237,6 +1237,8 @@ List的数组实现，底层为数组
 
 是同步的，即是单线程的，速度慢
 
+被ArrayList取代
+
 # Set集合
 
 不包含重复元素
@@ -1452,6 +1454,20 @@ Collection集合中，元素是孤立的，Map集合中，元素是成对存在�
 
 ​		2.LinkedHashMap集合是一个有序的集合，存储元素和取出元素顺序是一样的
 
+### Hashtabel
+
+HashMap集合可以存储null值，null键
+
+Hashtabel集合不能存储null值，null键
+
+底层是哈希表，单线程集合，速度慢
+
+被HashMap取代
+
+但是其子类：Properties依然被广泛使用
+
+Properties集合是唯一一个和*IO*流相结合的集合
+
 ## Map接口常用方法
 
 `public V put(K key,V value)`:返回值类型为V，如果key值集合中没有，返回的V为null，如果有，则替换key对应的value值，返回被替换的value值
@@ -1561,4 +1577,129 @@ Map集合中的方法：
 
     }
 ```
+
+## HashMap存储自定义类型键值
+
+Map集合保证**key**值是唯一的，作为key的元素，必须**重写hashCode方法和equals方法**，以保证key值唯一
+
+## HashMap实现统计字符串中字符个数
+
+```java
+//用HashMap中key不能重复的特性    
+public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("输入字符串");
+        String str = sc.next();//aaabbbcca
+        HashMap<Character,Integer> map = new HashMap<>();
+
+        for (char c : str.toCharArray()) {
+            if(map.containsKey(c)){
+                Integer value = map.get(c);
+                value++;
+                map.put(c,value);
+            }else{
+                map.put(c,1);
+            }
+        }
+        System.out.println(map);//{a=4, b=3, c=2}
+
+    }
+```
+
+# JDK9对集合添加的优化
+
+JDK9添加了集中集合工厂方法，更方便创建少量元素的集合、map实例。新的List、Set、Map的**静态**工厂方法可以更方便的创建集合的不可变实例
+
+List接口，Set接口，Map接口：增加了一个静态方法of,可以给集合一次性添加多个元素
+
+使用前提：
+
+​	当集合中存储的元素的个数已经确定了，不再改变时使用
+
+注意：
+
+​	1.of方法只适用于List接口，Set接口，Map接口，**不适用于接口的实现类**
+
+​	2.of方法的返回值是一个不能改变的集合，集合不能再使用add,put方法添加元素，会抛出异常
+
+​	3.Set接口和Map接口在调用of方法时，不能有重复的元素，否则会抛出异常
+
+```java
+    public static void main(String[] args) {
+        List<Integer> in = List.of(1, 2, 3,4,5,6,7);
+        Set<String> s = Set.of("a","b","c");
+        Map<Character,Integer> m = Map.of('a',1,'b',2,'c',3);
+
+    }
+```
+
+# 有序的斗地主发牌看牌案例
+
+```java
+import java.util.*;
+
+public class Order_Poker {
+    public static void main(String[] args) {
+        List<String> shape = List.of("♥","♣","♠","♦");
+        List<String> numbers = List.of("2","A","K","Q","J","10","9","8","7","6","5","4","3");
+        HashMap<Integer,String> pokers = new HashMap<>();
+        ArrayList<Integer> index_arr = new ArrayList<>();
+        //生成牌
+        Integer index = 0;
+        pokers.put(index,"keen");
+        index++;
+        pokers.put(index,"queen");
+        index++;
+        for (String number : numbers) {
+            for (String s : shape) {
+                String poker = s+number;
+                pokers.put(index,poker);
+                index++;
+            }
+        }
+        for(int i=0;i<=53;i++){
+            index_arr.add(i);
+        }
+        //发牌
+        ArrayList<Integer> p1 = new ArrayList<>();
+        ArrayList<Integer> p2 = new ArrayList<>();
+        ArrayList<Integer> p3 = new ArrayList<>();
+        ArrayList<Integer> dipai = new ArrayList<>();
+        Collections.shuffle(index_arr);
+
+        for (int i = 0;i<index_arr.size();i++) {
+            Integer temp = index_arr.get(i);
+            if(i>50){
+                dipai.add(temp);
+            }else if(i % 3 == 0)
+            {
+                p1.add(temp);
+            }else if(i % 3 == 1)
+            {
+                p2.add(temp);
+            }else if(i % 3 == 2)
+            {
+                p3.add(temp);
+            }
+        }
+        //看牌
+        saw("player1",pokers,p1);
+        saw("player2",pokers,p2);
+        saw("player3",pokers,p3);
+        saw("dipai",pokers,dipai);
+    }
+    public static void saw(String name,HashMap<Integer,String> map,ArrayList<Integer> arr){
+        System.out.print(name+":");
+        Collections.sort(arr);
+        ArrayList<String> res = new ArrayList<>();
+        for (Integer integer : arr) {
+            res.add(map.get(integer));
+        }
+        System.out.println(res);
+    }
+}
+
+```
+
+
 
