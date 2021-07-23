@@ -1633,7 +1633,7 @@ List接口，Set接口，Map接口：增加了一个静态方法of,可以给集�
     }
 ```
 
-# 有序的斗地主发牌看牌案例
+# 有序的扑克牌案例
 
 ```java
 import java.util.*;
@@ -1701,5 +1701,87 @@ public class Order_Poker {
 
 ```
 
+# 异常
 
+## 概述
+
+在java等面向对象的编程语言中，异常本身是一个类，产生异常就是创建异常对象并抛出了一个异常对象，java处理异常的方式是中断处理
+
+ 异常的根类是`java.lang.Throwable`，其下有两个子类，`java.lang.Error`和`java.lang.Exception`,平时所说的异常指`java.lang.Exception`
+
+* Error：工程师不能解决，只能尽量避免（绝症，必须修改源代码程序才能执行）
+
+  ```java
+  //OutOfMemoryError,内存溢出错误，创建的数组太大，超出了给JVM分配的内存，只能修改源代码
+  int[] arr = new int[1024*1024*1024];
+  ```
+
+  
+
+* Exception：编译期异常，由于使用不当导致，可以避免
+
+  ​	RuntimeException：运行期异常（小病），是Exception下的一个子类，把异常处理后程序可以继续执行
+
+```java
+SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+Date bir = format.parse(str);//此处的parse方法就需要处理异常
+//第一种处理方法，将异常抛出给虚拟机处理，虚拟机中止程序并打印异常
+public static void main(String[] args) throws ParseException 
+//第二种处理方法，try...catch,程序会继续运行之后的代码，结束后打印异常
+try {
+    //可能会出现异常的代码
+     bir = format.parse(str);
+} catch (ParseException e) {
+    //异常的处理逻辑
+     e.printStackTrace();
+}
+```
+
+## 异常处理过程分析
+
+<img src="https://raw.githubusercontent.com/skrdss/Notes/master/img/20210723211316.png"  />
+
+异常处理5个关键字：**try,catch,finally,throw,throws**
+
+### throw
+
+作用：在指定方法中抛出指定异常
+
+格式：`throw new xxxException("异常产生的原因")`
+
+注意：
+
+​	1.throw关键字必须写在方法内部
+
+​	2.throw关键字后的new的对象必须是Exception或者Exception的子类对象
+
+​	3.throw关键字抛出指定的异常对象，我们就必须处理这个异常对象
+
+​		throw关键字后创建的是`RuntimeException`或者是`RuntimeException`的子类对象，可以不处理(比如		`NullPointerException`,`ArrayIndexOutOfBoundsException`)，交给JVM处理（打印异常，中断程序）
+
+​		throw关键字后边创建的是编译异常（写代码的时候报错），我们就必须处理这个异常，要么throws，要么try...catch
+
+​	实际工作中，我们首先必须对方法传递过来的参数进行合法性校验，如果参数不合法，就必须使用抛出异常的方式，告知方法的调用者，传递的参数有问题
+
+```java
+public class Throw_learn {
+    public static void main(String[] args) {
+        int[] arr = {1,2,3,4,5,6};
+        int[] ar = null;
+        print(arr,4);
+        //print(ar,0);
+        print(arr,6);
+    }
+
+    public static void print(int[] arr,int index){
+        if(arr == null){
+            throw new NullPointerException("空指针异常");
+        }
+        if(index<0 || index>=arr.length){
+            throw new ArrayIndexOutOfBoundsException("索引越界");
+        }
+        System.out.println(arr[index]);
+    }
+}
+```
 
