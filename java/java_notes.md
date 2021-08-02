@@ -2156,12 +2156,43 @@ public class Main_thread {
 
   内存图
 
-  
+  ![image-20210802214925213](java_notes.assets/image-20210802214925213.png)
 
   
 
 * 方式二：
 
+  实现Runnable接口，实现run方法
+  
+  ```java
+  /*
+  实现步骤：
+      1.创建Runnable接口实现类
+      2.重写run()方法
+      3.创建Runnable实现类的对象
+      4.创建Thread类对象，构造方法中传入Runnable实现类对象
+      5.调用Thread类的start方法，开启新线程执行run方法
+   */
+  
+  //定义Runnable实现类
+  public class Runnable_Impl implements Runnable{
+      @Override
+      public void run() {
+          System.out.println(Thread.currentThread().getName());
+      }
+  }
+  
+  //主方法
+  public class Main_thread {
+      public static void main(String[] args) {
+          Runnable_Impl runnable_ = new Runnable_Impl();
+          Thread thread = new Thread(runnable_);
+          thread.start();
+      }
+  
+  }
+  ```
+  
   
 
 ## Thread类常用方法：
@@ -2182,11 +2213,11 @@ public class Main_thread {
 
 `public void run()`：定义此线程要执行的任务
 
+`public String getName()`：返回该线程名称
+
 `public static void sleep(long millis)`：暂停当前线程指定毫秒数，暂停结束后继续执行
 
-`String getName()`：返回该线程名称
-
-`static Thread currentThread()`：返回当前正在执行的线程对象的引用
+`public static Thread currentThread()`：返回当前正在执行的线程对象的引用
 
 ```java
 /*
