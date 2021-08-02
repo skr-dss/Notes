@@ -25,15 +25,15 @@ typora-copy-images-to: upload
 
 ## 示例过程
 
-![1](https://raw.githubusercontent.com/skrdss/Notes/master/img/20210720092100.png)
+![20210720092100](java_notes.assets/20210720092100-16278884627662.png)
 
 对象作为参数传递，实际上传递的是对象的地址
 
-![2](https://raw.githubusercontent.com/skrdss/Notes/master/img/20210720092145.png)
+![20210720092100](java_notes.assets/20210720092100-16278884511211.png)
 
 对象作为返回值，返回的还是地址值
 
-![3](https://raw.githubusercontent.com/skrdss/Notes/master/img/20210720092204.png)
+![20210720092100](java_notes.assets/20210720092100-16278884741763.png)
 
 ## 注意事项
 
@@ -146,7 +146,7 @@ String str2 = new String(by);
 System.out.println(str1 + "\n" + str2);
 ```
 
-![4](https://raw.githubusercontent.com/skrdss/Notes/master/img/20210720092221.png)
+![20210720092100](java_notes.assets/20210720092100-16278885097844.png)
 
 String 类型字符串比较,只有内容完全相同才会返回true：
 `str1.equals( str2 );`
@@ -189,7 +189,7 @@ static修饰成员方法，那么这个成员方法也不属于对象，而属�
 
 ​			2.静态方法中不能使用this,原因是this代表当前对象，通过谁调用的方法，谁就是当前对象。
 
-![5](https://raw.githubusercontent.com/skrdss/Notes/master/img/20210720092236.png)
+![20210720092100](java_notes.assets/20210720092100-16278885264515.png)
 
 静态代码块
 
@@ -310,7 +310,7 @@ public class Zi extends Fu{
 
 注意：子类method中有一个super.method(); 图中没有写出来
 
-![6](https://raw.githubusercontent.com/skrdss/Notes/master/img/20210720092256.png)
+![20210720092100](java_notes.assets/20210720092100-16278885406386.png)
 
 # 抽象方法
 
@@ -897,7 +897,7 @@ System.out.println(Arrays.toString(dest));
 
 ## 单列集合体系结构
 
-![image-20210721171947304](https://raw.githubusercontent.com/skrdss/Notes/master/img/20210721171955.png)
+![20210720092324](java_notes.assets/20210720092324-16278887788017.png)
 
 
 
@@ -973,7 +973,7 @@ Iterator迭代器是一个接口，无法直接使用，需要使用该接口的
 
 * 原理
 
-  ![7](https://raw.githubusercontent.com/skrdss/Notes/master/img/20210720092324.png)
+  ![20210720092324](java_notes.assets/20210720092324.png)
 
 #  增强for循环
 
@@ -1739,11 +1739,11 @@ try {
 
 ## 异常处理过程分析
 
-<img src="https://raw.githubusercontent.com/skrdss/Notes/master/img/20210723211316.png"  />
+![20210720092324](java_notes.assets/20210720092324-16278888234508.png)
 
 异常处理5个关键字：**try,catch,finally,throw,throws**
 
-### throw
+## throw关键字
 
 作用：在指定方法中抛出指定异常
 
@@ -1775,7 +1775,7 @@ public class Throw_learn {
 
     public static void print(int[] arr,int index){
         if(arr == null){
-            throw new NullPointerException("空指针异常");
+            throw new NullPointerException("空指针异常");//对于这一步，调用下面的Objects.requireNonNull（obj）更方便
         }
         if(index<0 || index>=arr.length){
             throw new ArrayIndexOutOfBoundsException("索引越界");
@@ -1785,3 +1785,297 @@ public class Throw_learn {
 }
 ```
 
+## Objects非空判断
+
+Objects类由一些静态的实用方法组成 ，这些方法是null-save(空指针安全)的或null-tolerant（空指针容忍）的，在它的源码中，对对象为null的值进行了抛出异常操作
+
+```java
+public static <T> T requirenNonNull(T obj){
+    if(obj == null)
+        throw new NullPointerException();
+    return obj;
+}
+```
+
+```java
+//使用方法
+public class Objects_learn {
+    public static void main(String[] args) {
+        method(null);
+    }
+
+    private static void method(Object obj) {
+        //Objects.requireNonNull(obj);
+        Objects.requireNonNull(obj,"空指针异常");
+    }
+}
+```
+
+## 声明异常throws
+
+throws关键字：异常处理的第一种方式，交给别人处理
+
+作用：
+
+​	当方法内部抛出异常对象的时候，我们必须处理这个异常对象
+
+​	可以使用throws关键字处理异常对象，会把异常对象抛出给方法调用者处理，最终交给JVM处理-->中断处理
+
+使用格式：
+
+​	在方法声明时使用
+
+```java
+/*
+		修饰符 返回值类型 方法名（参数列表） throws AAAException,BBBException···{
+
+				throw new AAAException("产生原因")；
+
+				throw new BBBException("产生原因")；
+
+		}
+		注意：
+		1.throws关键字必须写在方法的声明处
+		2.throws关键字后面必须是Exception或Exception子类
+		3.方法内部如果抛出多个异常对象，throws后面必须声明多个异常对象（如果异常对象有父子类关系，只声明父类异常即可）
+		4.如果调用了一个声明抛出异常的方法，我们就必须处理声明的异常
+		要么继续使用throws抛出，交给方法调用者，最终交给JVM，要么自己try···catch处理
+		throw关键字后创建的是`RuntimeException`（即运行时异常）或者是`RuntimeException`的子类对象，可以不处理(比如		`NullPointerException`,`ArrayIndexOutOfBoundsException`)，交给JVM处理（打印异常，中断程序）
+	
+*/
+public class Throw_learn {
+    public static void main(String[] args) throws Exception {
+        print("c://a.pdf");
+    }
+
+    public static void print(String path) throws /*FileNotFoundException,*/Exception {
+       // FileNotFoundException extends IOException,因此只声明IOException即可
+        // 或者所有xxxException都是Exception的子类，直接throws Exception也行
+        if(!path.equals("c://a.txt")){
+            throw new FileNotFoundException("路径错误");
+        }
+        if(!path.endsWith(".txt")){
+            throw new IOException("后缀名错误");
+        }
+    }
+}
+```
+
+## try···catch：
+
+异常处理的第二种方式，自己处理异常
+
+```java
+/*
+格式：
+	try{
+		可能产生异常的代码
+	}catch(定义一个异常的变量，用来接收try中抛出的异常对象){
+		异常的处理逻辑，获取异常对象后，怎么处理异常对象。在实际工作中的处理一般把异常信息记录到一个日志中
+	}
+	···
+	catch(异常类名 变量名){
+	}
+	注意：
+		1.try中可能抛出多个异常，可以用多个catch语句处理
+		2.如果try中产生了异常，则执行cath中的处理逻辑，执行完接着执行后面的代码。如果没有异常，catch语句不执行。
+*/
+public class Throw_learn {
+    public static void main(String[] args){
+        try{
+            print("c://a.pdf");
+        }catch(IOException e){
+            //try中抛出什么异常对象，catch就定义什么异常变量，用来接收这个异常对象
+            System.out.println("IO异常");
+        }
+        System.out.println("继续执行");
+    }
+
+    public static void print(String path) throws /*FileNotFoundException,*/IOException {
+       // FileNotFoundException extends IOException,因此只声明IOException即可
+        // 或者所有xxxException都是Exception的子类，直接throws Exception也行
+        if(!path.equals("c://a.txt")){
+            throw new FileNotFoundException("路径错误");
+        }
+        if(!path.endsWith(".txt")){
+            throw new IOException("后缀名错误");
+        }
+    }
+}
+```
+
+throwable类中定义了三个异常处理的方法
+
+`String getMessage()`：返回此throwable的简短描述
+
+`String toString()`：返回此throwable的详细消息字符串
+
+`void printStackTrace()`：JVM打印异常对象，默认此方法，打印的异常信息是最全面的
+
+```java
+        try{
+            print("c://a.pdf");
+        }catch(IOException e){
+
+            System.out.println(e.getMessage());	//路径错误
+            System.out.println(e.toString);	//java.io.FileNotFoundException: 路径错误
+            e.printStackTrace();  //	java.io.FileNotFoundException: 路径错误
+            					//			at Exception_learn.Throw_learn.print(Throw_learn.java:25)
+            					//			at Exception_learn.Throw_learn.main(Throw_learn.java:11)
+        }
+        System.out.println("继续执行");	
+									
+    }
+```
+
+## finally关键字：
+
+无论有没有异常，finally代码块都会执行
+
+```java
+try{
+    ···
+}catch(···){
+    ···
+}finally{
+    ···
+}
+```
+
+注意：finally不能单独使用，必须和try一起使用
+
+​			finally一般用于资源释放（资源回收），无论程序是否出现异常，最后都要资源释放（IO）
+
+​			finally中如果有return语句，会永远返回finally中的结果，因此要避免该情况的发生
+
+```java
+public class Demo {
+    public static void main(String[] args) {
+        int b = getA(10);
+        System.out.println(b);//100,而不是10
+    }
+
+    public static int getA(int a) {
+        try {
+            return a;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            a = 100;
+            return a;
+        }
+    }
+}
+```
+
+
+
+## 多异常处理
+
+* 多次捕获，多次处理
+
+  即使用多次try···catch语句
+
+* 一次捕获，多次处理
+
+  一个try语句，多个catch语句
+
+  注意：
+
+  ​	catch里面定义的异常变量，如果有父子类关系，那么子类的异常变量必须写在上边，否则就会报错
+
+  原因：
+
+  ​	try中如果出现了异常对象，会把异常对象抛出给catch处理，抛出的异常对象，会从上到下依次赋值给catch中定义的异常变量
+
+  如果父类在前，由于多态的原因，异常对象会赋值给父类变量，则子类变量没有使用，就会报错
+
+* 一次捕获，一次处理
+
+  ```java
+  try{
+      ···
+  }catch(Exception e){	//	Exception是所有异常类的父类
+      ···
+  }
+  ```
+
+## 父子类异常处理
+
+子类重写父类方法时，只能：
+
+​	1.抛出和父类相同的异常
+
+​	2.抛出父类异常的子类
+
+​	3.不抛出异常
+
+如果父类方法没有抛出异常，子类重写父类方法时也不能抛出异常，当子类产生异常时，只能try···catch捕获
+
+## 自定义异常类
+
+```java 
+/*
+格式：
+	public class xxxException extends Exception/RuntimeTxception{
+		添加一个空参数构造方法
+		添加一个带异常信息的构造方法
+	}
+注意：
+	自定义异常类一般都以Exception结尾，说明该类是一个异常类
+	自定义异常类必须继承Exception或者RuntimeException
+		继承Exception：那么定义的异常类就是编译期异常，如果方法内部抛出编译期异常，必须处理，要么throws，要么try···catch
+*/
+public class RegisterException extends Exception{
+    public RegisterException() {
+    }
+/*
+查看源码发现，所有异常类都会有一个带有异常信息的构造方法，方法内部会调用父类带异常信息的构造方法，让父类来处理这个异常信息
+ */
+    public RegisterException(String message) {
+        super(message);
+    }
+}
+```
+
+
+
+```java
+/*
+利用上面自定义的异常类，模拟注册操作，如果用户名已经存在，则抛出异常并提示：该用户已被注册
+分析：
+    1.使用数组保存已经注册过的用户名（数据库）
+    2.使用Scanner获取用户输人的注册用户名（前端，页面）
+    3.定义一个方法，对用户输入的用户名进行判断，
+        遍历数组，比较用户名
+        true；
+            用户名存在，抛出RegisterException异常，告知已被注册
+        false：
+            继续比较
+        循环结束，提示“注册成功”
+ */
+public class Exception_Practice {
+    static String[] usernames = {"张三","李四","王五"};
+
+    public static void main(String[] args){
+        Scanner sc= new Scanner(System.in);
+        System.out.println("输入用户名：");
+        String str = sc.next();
+        for (String username : usernames) {
+            if(Objects.equals(username,str)){
+                throw new RegisterException("用户已被注册");
+            }
+        }
+        System.out.println("注册成功");
+
+    }
+}
+```
+
+# 多线程
+
+## 并发与并行
+
+并发：指多个时间在同一时间段内发生
+
+并行：指多个时间在同一时刻发生
