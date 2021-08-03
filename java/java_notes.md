@@ -2116,84 +2116,121 @@ public class Main_thread {
 
 ## 创建多线程程序
 
-* 方式一：
+### 方式一：继承Thread
 
-  ```java
-  /*
-  实现步骤：
-      1.创建一个Thread类的子类
-      2.在Thread类的子类中重写Thread类中的run方法，设置线程任务（开启线程要做什么）
-      3.创建Thread类的子类对象
-      4.调用Thread类中的start方法，开启新的线程，执行run方法
-          void start（）使该线程开始执行，java的虚拟机调用该线程的run方法
-          结果是两个线程并发运行：当前线程（main线程）和另一个线程（创建的新线程，执行其run方法）
-          多次启动一个线程是非法的，特别是当线程结束后，不能重新启动
-   */
-  
-  public class Main_thread {
-      public static void main(String[] args) {
-          MyThread myThread = new MyThread();
-          myThread.start();//与直接调用run方法有所区别，如果直接调用run方法，则使用的是单线程（见内存图）
-          for(int i=0;i<10;i++){
-              System.out.println("mainthread"+i);
-          }
-      }
-  
-  }
-  ```
+```java
+/*
+实现步骤：
+    1.创建一个Thread类的子类
+    2.在Thread类的子类中重写Thread类中的run方法，设置线程任务（开启线程要做什么）
+    3.创建Thread类的子类对象
+    4.调用Thread类中的start方法，开启新的线程，执行run方法
+        void start（）使该线程开始执行，java的虚拟机调用该线程的run方法
+        结果是两个线程并发运行：当前线程（main线程）和另一个线程（创建的新线程，执行其run方法）
+        多次启动一个线程是非法的，特别是当线程结束后，不能重新启动
+ */
 
-  
+public class Main_thread {
+    public static void main(String[] args) {
+        MyThread myThread = new MyThread();
+        myThread.start();//与直接调用run方法有所区别，如果直接调用run方法，则使用的是单线程（见内存图）
+        for(int i=0;i<10;i++){
+            System.out.println("mainthread"+i);
+        }
+    }
 
-  ```java
-  public class MyThread extends Thread{
-      public void run(){
-          for(int i=0;i<10;i++){
-              System.out.println("mythread"+i);
-          }
-      }
-  }
-  ```
+}
+```
 
-  内存图
 
-  ![image-20210802214925213](java_notes.assets/image-20210802214925213.png)
 
-  
+```java
+public class MyThread extends Thread{
+    public void run(){
+        for(int i=0;i<10;i++){
+            System.out.println("mythread"+i);
+        }
+    }
+}
+```
 
-* 方式二：
+内存图
 
-  实现Runnable接口，实现run方法
-  
-  ```java
-  /*
-  实现步骤：
-      1.创建Runnable接口实现类
-      2.重写run()方法
-      3.创建Runnable实现类的对象
-      4.创建Thread类对象，构造方法中传入Runnable实现类对象
-      5.调用Thread类的start方法，开启新线程执行run方法
-   */
-  
-  //定义Runnable实现类
-  public class Runnable_Impl implements Runnable{
-      @Override
-      public void run() {
-          System.out.println(Thread.currentThread().getName());
-      }
-  }
-  
-  //主方法
-  public class Main_thread {
-      public static void main(String[] args) {
-          Runnable_Impl runnable_ = new Runnable_Impl();
-          Thread thread = new Thread(runnable_);
-          thread.start();
-      }
-  
-  }
-  ```
-  
-  
+![image-20210802214925213](java_notes.assets/image-20210802214925213.png)
+
+
+
+### 方式二：实现Runnable接口
+
+实现Runnable接口，实现run方法
+
+```java
+/*
+实现步骤：
+    1.创建Runnable接口实现类
+    2.重写run()方法
+    3.创建Runnable实现类的对象
+    4.创建Thread类对象，构造方法中传入Runnable实现类对象
+    5.调用Thread类的start方法，开启新线程执行run方法
+ */
+
+//定义Runnable实现类
+public class Runnable_Impl implements Runnable{
+    @Override
+    public void run() {
+        System.out.println(Thread.currentThread().getName());
+    }
+}
+
+//主方法
+public class Main_thread {
+    public static void main(String[] args) {
+        Runnable_Impl runnable_ = new Runnable_Impl();
+        Thread thread = new Thread(runnable_);
+        thread.start();
+    }
+
+}
+```
+
+**两种方式的区别（或者说实现Runnable接口创建多线程的好处）：**
+
+​	1.避免了单继承的局限性
+
+​	2.增强了程序的扩展性，降低了程序的耦合性（解耦）
+
+​			实现Runnable接口的方式，把设置线程任务和开启新线程进行了分离（解耦）
+
+​			实现类中，重写了run方法，用来设置线程任务
+
+​			创建Thread类对象，调用start方法，用来开启新线程
+
+### 匿名内部类创建线程
+
+实现代码简化的目的
+
+```java
+public class Main_thread {
+    public static void main(String[] args) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Thread.currentThread().setName("线程");
+                System.out.println(Thread.currentThread().getName());
+            }
+        }){
+ //如果new Thread也重写了run方法，则优先执行该方法
+//            public void run(){
+//                System.out.println("hello world");
+//            }
+        }.start();
+
+    }
+
+}
+```
+
+
 
 ## Thread类常用方法：
 
@@ -2272,5 +2309,329 @@ public class MyThread extends Thread{
         System.out.println(mt.getName());
     }
 }
+```
+
+## 线程安全问题
+
+多线程不访问共享数据不会有问题
+
+多线程访问共享数据，会产生混乱，比如多个售票窗口都在卖相同的100张票
+
+```java
+/*
+下面代码就会出现问题，因为所有线程共享了一个tickets，如果每个线程都使用一个Runnable_Impl就不会有问题
+*/
+
+public class Runnable_Impl implements Runnable{
+    int ticktes =20;
+    @Override
+    public void run() {
+        for (int i = 0; i < ticktes; i++) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println(Thread.currentThread().getName()+"正在卖第"+i+"张票");
+        }
+
+    }
+}
+
+public class Main_thread {
+    public static void main(String[] args) {
+        Runnable_Impl runnable_ = new Runnable_Impl();
+        Thread t1 = new Thread(runnable_);
+        Thread t2 = new Thread(runnable_);
+        Thread t3 = new Thread(runnable_);
+
+        t1.start();
+        t2.start();
+        t3.start();
+    }
+
+}
+```
+
+原理分析：
+
+![image-20210803154545764](java_notes.assets/image-20210803154545764.png)
+
+![image-20210803154626082](java_notes.assets/image-20210803154626082.png)
+
+## 线程同步
+
+解决上面的线程安全问题有三种方式：
+
+​	1.同步代码块
+
+​	2.同步方法
+
+​	3.锁机制
+
+### 同步代码块
+
+`synchronized`关键字可以用于方法中的某个区块中，表示只对这个区块的资源进行互斥访问
+
+```java
+格式：
+	synchronized(同步锁){
+		需要同步操作的代码
+	}
+```
+
+同步锁：
+
+对象的同步锁只是一个概念，可以想象为在对象上标记了一个锁
+
+​	1.锁对象 可以是任意类型
+
+​	2.多个线程对象 要使用同一把锁
+
+```java
+public class Runnable_Impl implements Runnable{
+    int ticktes =100;
+    //创建一个锁对象，注意一定要在run方法外，如果在run方法内部，每个线程都会有一个锁，就没有意义了
+    Object obj = new Object();
+    @Override
+    public void run() {
+
+        while(true){
+            synchronized (obj) {
+                if(ticktes>0) {
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println(Thread.currentThread().getName() + "正在卖第" + ticktes + "张票");
+                    ticktes--;
+                }else{
+                    return;
+                }
+            }
+        }
+
+
+    }
+}
+
+public class Main_thread {
+    public static void main(String[] args) {
+        Runnable_Impl runnable_ = new Runnable_Impl();
+        Thread t1 = new Thread(runnable_);
+        Thread t2 = new Thread(runnable_);
+        Thread t3 = new Thread(runnable_);
+
+        t1.start();
+        t2.start();
+        t3.start();
+    }
+
+}
+```
+
+**原理：**
+
+使用了一个锁对象，也叫同步锁，对象锁。
+
+3个线程抢夺cpu控制权，当t1抢到时，执行run方法遇到synchronized代码块，此时t1会检查synchronized代码块是否有锁对象。发现有，就会获取锁对象，进入到同步中执行
+
+t2抢到了cpu执行权后，执行run方法遇到synchronized代码块，此时t2会检查synchronized代码块是否有锁对象。发现没有，t2线程进入阻塞状态，直到t1线程执行完同步中的代码，会把锁对象归还给同步代码块，t2才能获取锁对象进入同步中执行
+
+### 同步方法
+
+使用synchronized修饰的方法叫做同步方法，保证A线程执行该方法时其他线程只能在方法外等着
+
+格式：
+
+```java
+public synchronized void method(){
+	可能产生线程安全问题的代码
+}
+```
+
+```java
+/*
+同步方法的锁对象就是实现类对象new Runnable_Impl()
+也就是this，谁调用方法，那么方法的对象就是谁
+*/
+public class Runnable_Impl implements Runnable{
+    int ticktes =100;
+    Object obj = new Object();
+    @Override
+    public void run() {
+        while(true){
+            sellTikets();
+        }
+    }
+
+    public synchronized void sellTikets(){
+        if(ticktes>0) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println(Thread.currentThread().getName() + "正在卖第" + ticktes + "张票");
+            ticktes--;
+        }else{
+            return;
+        }
+    }
+    /*
+    或者：
+    public void sellTikets(){
+    	synchronized（this）{
+    		if(ticktes>0) {
+            	try {
+                	Thread.sleep(10);
+            	} catch (InterruptedException e) {
+                	e.printStackTrace();
+           		}
+            	System.out.println(Thread.currentThread().getName() + "正在卖第" + ticktes + "张票");
+            	ticktes--;
+        	}else{
+            	return;
+        	}
+    	}
+        
+    }
+    */
+}
+```
+
+**静态同步方法**
+
+锁对象不能是this，因为this是创建对象之后产生的，静态方法优先于对象
+
+静态方法的锁对象是本类的class属性--->class文件对象（反射）
+
+```java
+//在同步方法前加static即可
+//或者
+public void sellTikets(){
+    synchronized(Runnable_Impl.class){
+        if(ticktes>0) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println(Thread.currentThread().getName() + "正在卖第" + ticktes + "张票");
+            ticktes--;
+        }else{
+            return;
+        }
+    }
+        
+    }
+```
+
+### Lock锁
+
+`java.util.concurrent.locks.Lock`接口
+
+Lock实现提供了比使用synchronized方法和语句 更广泛的锁定操作
+
+Lock接口中的方法：
+
+​	`void lock()`：获取锁
+
+​	`void unlock()`：释放锁
+
+`java.util.concurrent.locks.Reentrantlock`实现了Lock接口，使用时直接创建Reentrantlock对象即可
+
+```java
+/*
+使用步骤：
+	1.创建ReentrantLock对象l
+	2.需要加锁的代码前调用l.lock()加锁
+	3.结束后调用l.unlock()解锁
+*/
+public class Runnable_Impl implements Runnable{
+    int ticktes = 100;
+    @Override
+    public void run(){
+        Lock l = new ReentrantLock();
+        while(true){
+                l.lock();
+                if(ticktes>0) {
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println(Thread.currentThread().getName() + "正在卖第" + ticktes + "张票");
+                    ticktes--;
+                }else{
+                    return;
+                }
+                l.unlock();
+        }
+    }
+}
+```
+
+## 线程六种状态
+
+![image-20210803211043424](java_notes.assets/image-20210803211043424.png)
+
+![image-20210803211245904](java_notes.assets/image-20210803211245904.png)
+
+```java
+package Thread_learn;
+/*
+等待唤醒案例：线程之间的通信
+    创建一个顾客线程：告知老板要的包子和数量，调用wait方法，放弃cpu执行权，进入Waitting状态
+    创建老板线程：花5秒钟做包子，做好后调用notify方法唤醒顾客线程
+
+注意：
+    顾客和老板线程必须用同步代码块包裹，保证等待和唤醒只有一个在执行
+    同步使用的锁对象必须唯一
+    只有锁对象才能调用wait和notify方法
+
+
+Object类中的方法：
+    void wait()：在其他线程调用此对象的notify()或notifyAll()方法前，导致当前线程等待
+    void notify():唤醒在此对象监视器上等待的单个线程，会继续执行wait()方法后的代码
+ */
+
+public class Waitting {
+    public static void main(String[] args) {
+        Object obj = new Object();
+        new Thread(){
+            @Override
+            public void run() {
+                synchronized (obj){
+                    System.out.println("顾客：我要10个包子");
+                    try {
+                        obj.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println("顾客：我开始吃包子");
+                    System.out.println("-----------------------");
+                }
+            }
+        }.start();
+
+        new Thread(){
+            @Override
+            public void run() {
+                synchronized (obj){
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println("老板：包子做好了");
+                    obj.notify();
+                }
+            }
+        }.start();
+    }
+}
+
 ```
 
