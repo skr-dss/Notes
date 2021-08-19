@@ -216,8 +216,11 @@ import java.util
 ...
 int[ ] arr ={1,2,3}
 String str = Arrays.toString( arr );	//数组转字符串
-Arrays.sort( arr );		//默认升序排列(必须是数组才能使用4)
-
+Arrays.sort( arr );		//默认升序排列(必须是数组才能使用)
+//自定义类对象的比较，要么类中重写compoterTo方法，要么使用匿名内部类实现Comparator接口中的compare方法
+Arrays.sort(arr,new Comparator<Person>(){
+    public int compare(Person o1,Person o2){···}
+});
 ```
 
 # Math
@@ -2579,6 +2582,8 @@ public class Runnable_Impl implements Runnable{
 
 ![image-20210803211245904](java_notes.assets/image-20210803211245904.png)
 
+### 线程通信
+
 ```java
 package Thread_learn;
 /*
@@ -2606,7 +2611,7 @@ public class Waitting {
                 synchronized (obj){
                     System.out.println("顾客：我要10个包子");
                     try {
-                        obj.wait();
+                        obj.wait();//如果传入lang类型的参数，则作用和sleep一样，在指定时间后醒来
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -2626,7 +2631,7 @@ public class Waitting {
                         e.printStackTrace();
                     }
                     System.out.println("老板：包子做好了");
-                    obj.notify();
+                    obj.notify();//如果有多个线程需要唤醒，使用notify()一次只能唤醒一个，使用notifyAll()可以唤醒所有等待的线程
                 }
             }
         }.start();
@@ -2634,4 +2639,327 @@ public class Waitting {
 }
 
 ```
+
+### 等待唤醒机制
+
+```java
+//包子类
+public class Baozi {
+    private String pi;
+    private String xian;
+    boolean flag = false;
+}
+
+```
+
+```java
+//老板类
+public class Seller extends Thread{
+    private Baozi baozi = new Baozi();
+    public Seller() {
+    }
+    public Seller(Baozi baozi){
+        this.baozi = baozi;
+    }
+
+    @Override
+    public void run() {
+
+        while(true){
+            synchronized (baozi){
+
+                if(baozi.flag == true){
+                    try {
+                        baozi.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                System.out.println("老板开始做包子");
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("包子做好了");
+                baozi.flag=true;
+                baozi.notify();
+            }
+
+        }
+    }
+}
+```
+
+```java
+//顾客类
+public class Customer extends Thread{
+    private Baozi baozi = new Baozi();
+    public Customer() {
+    }
+    public Customer(Baozi baozi){
+        this.baozi = baozi;
+    }
+
+    @Override
+    public void run() {
+        while(true){
+            synchronized (baozi){
+                if(baozi.flag == false){
+                    try {
+                        baozi.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                System.out.println("顾客吃包子");
+                baozi.flag = false;
+                baozi.notify();
+                System.out.println("包子已经吃完了");
+                System.out.println("----------------");
+            }
+        }
+    }
+}
+```
+
+```java
+//测试类
+public class TestClass {
+    public static void main(String[] args) {
+        Baozi baozi = new Baozi();
+        Seller seller = new Seller(baozi);
+        Customer customer = new Customer(baozi);
+        seller.start();
+        customer.start();
+    }
+
+}
+```
+
+## 线程池
+
+### 概述
+
+如果每次使用线程时都重新创建一个线程，而且每个线程都是执行一个很短的任务就结束了，这样频繁的创建线程就会降低系统效率。
+
+有没有一种方法使得线程可以复用，执行完一个任务后不被销毁，继续执行其他任务？java中的线程池就可以达到这种效果
+
+**线程池其实就是一个容纳多个线程的容器，其中的线程都可以反复使用，省去了频繁创建线程对象的操作，无需反复创建线程而消耗过多资源。**
+
+### 原理
+
+![image-20210805103304409](java_notes.assets/image-20210805103304409.png)
+
+
+
+![image-20210805103440836](java_notes.assets/image-20210805103440836.png)
+
+优点：
+
+​	1.降低系统消耗
+
+​	2.提高响应速度
+
+​	3.提高线程的可管理性
+
+```java
+/*
+java.util.concurrent.Executors类是线程池的工厂类，用来创建线程池
+Executors类中的静态方法：
+	static ExecutorService newFixedThreadPool(int nThreads):创建一个可重用固定线程数的线程池
+	参数：
+		int nThreads:创建的线程池中包含的线程数量
+	返回值：
+		ExecutorService接口，返回的是ExecutorService接口的实现类对象，可以使用ExecutorService接口接收（面向接口编程）
+		
+java.util.concurrent.ExecutorService:线程池接口
+接口中的方法：
+	submit(Runnable task):提交一个Runnable任务用于执行
+	void shutdown():关闭/销毁线程池的方法，不建议使用，因为线程池的目的就是重复使用
+
+线程池使用步骤：
+	1.使用Executors工厂类中的静态方法newFixedThreadPool创建线程池
+	2.创建Runnable接口的实现类，重写run方法，告诉线程要做什么
+	3.调用ExecutorService中的方法submit,传递线程任务（实现类），开启线程，执行run方法
+	4.（不建议使用）调用ExecutorService中的方法shutdown销毁线程池
+*/
+```
+
+```java
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+public class Threadpool {
+    public static void main(String[] args) {
+        ExecutorService es = Executors.newFixedThreadPool(2);
+
+        es.submit(new Thread1());
+        es.submit(new Thread1());
+        es.submit(new Thread1());
+    }
+
+
+}
+```
+
+# Lambda表达式
+
+当我们要做线程中run()方法定义的事情时，必须要先写出Runnabel接口的实现类，再new一个实现类对象出来传递给Thread()，再调用start方法启动线程，或者使用匿名内部类的 形式，步骤繁琐，冗余代码多。比如我们仅仅做输出线程名这件事，但是却要做这么多步骤。
+
+JDK1.8--->Lambda表达式
+
+**标准格式：**
+
+```java
+(参数列表)->{重写方法的代码}
+```
+
+**何时使用：**
+
+ * 使用Lambda必须具有接口，且接口中有且仅有一个抽象方法
+ * 使用Lambda必须具有上下文推断，即方法的参数或局部变量必须为Lambda对应的接口类型，才能使用Lambda作为该接口的实例
+ * 有且仅有一个抽象方法的接口称为函数式接口
+
+```java
+public class Main_thread {
+    public static void main(String[] args) {
+        //new Thread中的参数本来是Runnable接口的实现类对象，此处（）代表run方法，有参数则通过此括号传入，->代表run方法中的代码
+        new Thread(()->{
+            System.out.println("new Thread-->"+Thread.currentThread().getName());
+        }).start();
+        new Thread(()->{
+            System.out.println("new Thread-->"+Thread.currentThread().getName());
+        }).start();
+    }
+
+}
+```
+
+**匿名内部类：**
+
+	* 无参数
+	* 无返回值
+	* 代码块
+
+**Lambda：**
+
+```java
+()->System.out.println("多线程任务执行");
+```
+
+* 前面的（）即run方法（接口中抽象方法）的参数（无），代表不需要任何条件
+
+* 箭头代表将前面的参数传递给后面的代码
+* 输出语句即业务逻辑代码
+
+**Lambda表达式实现接口的调用**
+
+```java
+//无参无返回值的抽象方法
+
+public class Main {
+    public static void main(String[] args) {
+        //匿名内部类方式
+        print(new AbstrctInterface() {
+            @Override
+            public void method1() {
+                System.out.println("world");
+            }
+        });
+        //lambda表达式方式
+        print(()->{
+            System.out.println("hello");
+        });
+    }
+    //AbstrctInterface为自己定义的接口，接口中只有一个抽象方法method1
+    public static void print(AbstrctInterface abs){
+        abs.method1();
+    }
+
+}
+```
+
+```java
+//有参有返回值的抽象方法
+
+import java.util.Arrays;
+import java.util.Comparator;
+
+public class Main {
+    public static void main(String[] args) {
+        Person arr[] = {
+                new Person("李逍遥",18),
+                new Person("赵灵儿",16),
+                new Person("林月如",17),
+        };
+        //匿名内部类重写Comparaor接口的compare方法
+        Arrays.sort(arr, new Comparator<Person>() {
+            @Override
+            public int compare(Person o1, Person o2) {
+                return o1.getAge() - o2.getAge();
+            }
+        });
+        //Lambda表达式
+        Arrays.sort(arr,(Person o1,Person o2)->{
+            return o1.getAge()-o2.getAge();
+        });
+        for (int i = 0; i < arr.length; i++) {
+            System.out.println(arr[i]);
+        }
+
+    }
+
+}
+```
+
+```java
+//练习
+
+public class Main {
+    public static void main(String[] args) {
+	//2.调用add方法传递参数，实现参数相加并返回结果	
+        int res = add(10,20,(int a,int b)->{
+            return a+b;
+        });
+        System.out.println(res);
+    }
+    //1.Calculaor为定义的接口，接口中定义抽象方法calculator();
+    public static int add(int a,int b,Calculator calculator){
+        return calculator.calc(a,b);
+    }
+}
+```
+
+**Lambda表达式省略格式**
+
+凡是根据上下文推导出来的内容，都可以省略书写
+
+可以省略的内容：
+
+* （参数列表）：括号中参数列表的数据类型可省略
+
+  ```java
+  int res = add(10,20,(a,b)-> a+b);
+  Arrays.sort(arr,(o1,o2)->o1.getAge()-o2.getAge());
+  ```
+
+  
+
+* （参数列表）：括号中的参数如果只有一个，那么类型和（）都可以省略
+
+  ```java
+  int res = add(10,a-> a+10);
+  ```
+
+* {一些代码}：如果{ }中的代码只有一行，无论是否有返回值，都可以省略{ }，return，分号
+
+  注意：{ }，return，分号三个必须一起省略
+
+  ```java
+  int res = add(10,20,(a,b)-> a+b);
+  new Thread(()->System.out.println(Thread.currentThread().getName()+"新线程创建了")).start;
+  ```
+
+  
 
