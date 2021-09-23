@@ -365,7 +365,7 @@ public  abstract  class  Animal{
 
 ​	`public class 实现类名称 implements 接口名称{	}`
 
-​	2.实现类必须覆盖重写接口中所有的抽象方法
+​	2.实现类必须覆盖重写接口中**所有**的抽象方法
 
 ​	3.创建实现类对象进行使用
 
@@ -558,6 +558,8 @@ public void method(Employee e){
 | 不同包子类   | YES    | YES       | NO        | NO      |
 | 不同包非子类 | YES    | NO        | NO        | NO      |
 
+
+
 注意：default不是关键字“default”,而是根本不写
 
 # 内部类
@@ -681,20 +683,22 @@ System.out.println(new Date().getTime());//等同于System.currentTimeMillis()
 System.out.println(new Date());//返回当前日期Thu Jul 01 15:35:36 CST2021
 /*
 Date带参构造方法：
-Date(longdate):传递毫秒值，将毫秒值转化为Date日期
+Date(long date):传递毫秒值，将毫秒值转化为Date日期
 */
 System.out.println(new Date(1625124936537L));//Thu Jul 01 15:35:36 CST2021
 ```
 
 * DateFormat类
   DateFormat是一个抽象类
-  作用：格式化 日期->文本 
-  	  解析    文本->日期
-  	  标准化
+  作用：
+  
+  ​	 格式化 日期->文本 
+  ​	  解析    文本->日期
+  ​	  标准化
   使用时需要使用其实现子类：SimpleDateFormat
 
   1.format()方法：日期->文本
-
+  
   ```java
   /*
   y年 M月 d日 H时 m分 s秒
@@ -703,14 +707,14 @@ System.out.println(new Date(1625124936537L));//Thu Jul 01 15:35:36 CST2021
   	2.调用方法
   */
   Date date =newDate();
-  SimpleDateFormat sd f= newSimpleDateFormat("yyyy-MM-ddHH:mm:ss");
+  SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-ddHH:mm:ss");
   String s = sdf.format(date);
   System.out.println(s);//2021-07-0116:30:36
   System.out.println(date);//ThuJul0116:30:36CST2021
   ```
 
   2.parse()方法：文本->日期
-
+  
   ```java
   /*
   使用步骤：
@@ -840,9 +844,9 @@ System.out.println(Arrays.toString(dest));
 
   ​	`StringBulider(String str)`
 
-  ​	`stringbulider->string`
+  stringbulider->string
 
-  bu1.toString( ) 将缓冲区内容转为字符串
+  `bu1.toString( )` 将缓冲区内容转为字符串
 
 # 包装类
 
@@ -980,7 +984,7 @@ Iterator迭代器是一个接口，无法直接使用，需要使用该接口的
 
 #  增强for循环
 
-也叫for each循环，是JDK1.5以后专门用来遍历**数组和集合**的，内部实现原理是个`Iterator`迭代器，所以在遍历过程中不能对集合中的元素进行增删操作
+也叫for each循环，是JDK1.5以后专门用来遍历**数组和集合**的，**内部实现原理是个`Iterator`迭代器**，所以在遍历过程中不能对集合中的元素进行增删操作
 
 ```java
 Collection<String> col = new ArrayDeque<>();
@@ -1071,7 +1075,7 @@ public class GenericImpl02<E> implements Generic<E>{
     }
 }
 GenericImpl02<String> gi2 = new GenericImpl02<>();
-GeneticImpl03<Integer> gi3 = new GenericImpl03<>();
+GeneticImpl02<Integer> gi3 = new GenericImpl02<>();
 ```
 
 
@@ -2962,4 +2966,544 @@ public class Main {
   ```
 
   
+
+# File类
+
+`java.io.File`类是文件和目录路径名的抽象表示，主要用于文件和目录的创建，查找和删除等操作
+
+java把电脑中的文件和文件夹（目录）封装为了一个File类，我们可以使用File类中的方法进行：
+
+​	创建、删除、获取文件（夹），判断文件（夹）是否存在，对文件夹遍历，获取文件大小
+
+**注意：**
+
+​	File类是一个与操作系统无关的类，任何操作系统都可以使用这个类中的方法
+
+**重点关键词：**
+
+​	file:文件的方法
+
+​	directory：文件夹/目录的方法
+
+​	path：路径的方法
+
+## File类中的静态成员变量
+
+`static String pathSeparator`:与系统有关的**路径**分隔符（返回值String类型）
+
+`static char pathSeparatorChar`:与系统有关的**路径**分隔符（返回值Char类型）
+
+其中`pathSeparator = ""+pathSeparatorChar`
+
+`static String separator`:与系统有关的**默认名称**分隔符（返回值String类型）
+
+`static String separatorChar`:与系统有关的**默认名称**分隔符（返回值Char类型）
+
+```java
+public class files {
+    public static void main(String[] args) {
+        System.out.println(File.separator);
+        System.out.println(File.pathSeparator);
+    }
+}
+/*
+输出：
+	\
+	;
+*/
+```
+
+
+
+**路径分隔符**
+
+Windows		分号；
+
+Linux			  冒号：
+
+
+
+**文件分隔符**
+
+Windows		反斜杠\
+
+Linux 			正斜杠/
+
+
+
+操作路径不要写死了
+
+`“D:\Github\Notes”	windows`
+
+`"D:/Github/Notes"			linux`
+
+`"D:"+File.separator+"Github"+File.separator+"Notes"`
+
+## File类的构造方法
+
+1. `File(String pathname)`	通过将给定路径名称字符串转换为抽象路径名来创建一个新File实例
+
+   ​	参数：
+
+   ​		String pathname:字符串的路径名称
+
+   ​		可以以文件或文件夹结尾，可以是相对路径或绝对路径，可以存在也可以不存在
+
+   ​		创建File对象，只是把字符串路径封装为File对象，不考虑路径真假情况
+
+2. `File(Sring parent,String child)`	根据 parent 路径名字符串和 child 路径名字符串创建一个新File实例
+
+   ​	参数：
+
+   ​		String parent：父路径
+
+   ​		String child：子路径
+
+   ​	好处：
+
+   ​		父路径和子路径可单独书写，使用起来非常灵活，父路径和子路径都可以变化
+
+   
+
+   3.`File(File parent,String child)`	根据parent抽象路径名和child路径名字符串创建一个新File实例
+
+   ​		参数：
+
+   ​			File parent：父路径
+
+   ​			String child：子路径
+
+   ​		好处：
+
+   ​			父路径和子路径都可以单独书写，使用灵活
+
+   ​			父路径是File类型，可以使用File的方法对路径进行一些操作，再使用路径创建对象
+
+## File类常用方法
+
+### 获取功能的方法
+
+* `public String getAbsolutePath()`：返回此File的绝对路径名字符串（输出绝对路径，即使构造方法传入的是相对路径，也输出绝对路径）
+* `public String getPath()`：将此File转换为路径名字符串（构造方法传入的是绝对路径就输出绝对路径，是相对路径就输出相对路径）
+* `public String getName()`：返回由此File表示的文件或目录的名称，即构造方法传入的路径的结尾部分
+* `public long length()`：返回由此File表示的文件的长度（字节单位，文件夹大小为0）
+
+```java
+import java.io.File;
+
+public class files {
+    public static void main(String[] args) {
+        File file = new File("a.txt");
+        System.out.println(file.getAbsolutePath());
+        //直接输出对象默认调用的就是 toString 方法，而这里 toString 方法调动了 getPath 方法
+        System.out.println(file);
+        System.out.println(file.toString());
+        //   public String toString() {
+        //        return getPath();
+        //    }
+        System.out.println(file.getName());
+        System.out.println(file.length());
+    }
+}
+```
+
+### 判断功能的方法
+
+* `public boolean exists()`：此 File 表示的文件或目录是否实际存在
+* `public boolean isDirectory()`：此 File 表示的是否为目录
+* `public boolean isFile()`：此File表示的是否为文件
+
+注意：
+
+​	`isDirectory() 和 isFile()`两个方法互斥，这两个方法使用前提是路径必须存在，否则都返回false
+
+### 创建和删除功能的方法
+
+* `public boolean createNewFile()`：当且仅当具有该名称的文件不存在时，创建一个空文件
+* `public boolean delete()`：直接从硬盘删除，不放入回收站。**文件夹中有内容，不会删除，返回false**
+* `public boolean mkdir()`：创建目录（单级文件夹）
+* `public boolean mkdirs()`：创建目录，包括任何必须但不存在的父目录（多级文件夹）
+
+### 目录的遍历
+
+* `public String[] list()`：返回一个String数组，表示该File目录中的所有子文件或目录
+* `public File[] listFiles()`：返回一个File数组，表示该File目录中的所有子文件或目录
+
+注意：
+
+​	隐藏的文件或目录也能获取到
+
+```java
+import java.io.File;
+import java.io.IOException;
+
+public class files {
+    public static void main(String[] args) throws IOException {
+        File files = new File("D:\\电影");
+        getAllFiles(files);
+
+    }
+
+    private static void getAllFiles(File files) {
+        File[] file = files.listFiles();
+        for (File file1 : file) {
+            if(file1.isDirectory()){
+                System.out.println(file1);
+                getAllFiles(file1);
+            }else{
+                String s = file1.getName();
+                System.out.println(s);
+            }
+        }
+    }
+}
+```
+
+
+
+### 文件过滤器
+
+java中有两个重载的`listFiles()`的方法，分别为:
+
+​	`File[] listFiles(FileFilter filter)`
+
+​	`File[] listFiles(FilenameFilter filter)`
+
+* `java.io.FileFilter`是一个接口，是File的过滤器。该接口的对象可以传递给File类的`listFiles(FileFilter)`作为参数，接口中只有一个方法:
+
+  ​	`boolean accept(File pathname)`：测试pathname是否应该包含在当前File目录中，符合则返回true
+
+  ​	参数：
+
+  ​		`File pathname`:使用`listFiles`方法遍历目录，得到的每一个文件对象
+
+* `java.io.FilenameFilter`也是一个接口，实现此接口的类实例可用于过滤文件名称，接口也只有一个方法：
+
+  ​	`boolean accept(File dir,String name)`测试指定文件是否应该包含在某一文件列表中
+
+  ​	参数：
+
+  ​			`File dir`：构造方法中传递的被遍历的目录
+
+  ​			`String name`：使用`listFiles`方法遍历目录获取的每个文件/文件夹的名称
+
+**注意：**
+
+​	两个过滤器接口是没有实现类的，需要自己写实现类（或者匿名内部类格式），重写过滤方法accept，在方法中定义过滤规则
+
+![image-20210826155053731](java_notes.assets/image-20210826155053731.png)
+
+```java
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FilenameFilter;
+import java.io.IOException;
+
+public class files {
+    public static void main(String[] args) throws IOException {
+        File files = new File("D:\\电影");
+        getAllFiles(files);
+
+    }
+
+    private static void getAllFiles(File files) {
+        /*
+        利用FileFilter接口的两种方法，Lamnda表达式和匿名内部类
+        */
+        //File[] file = files.listFiles((pathname)->pathname.isDirectory()||pathname.getName().endsWith(".mp4"));
+
+//        File[] file = files.listFiles(new FileFilter() {
+//            @Override
+//            public boolean accept(File pathname) {
+//                return pathname.isDirectory()||pathname.getName().endsWith(".mp4");
+//            }
+//        });
+        /*
+        利用FilenameFilter接口的两种方法，Lambda表达式和匿名内部类
+         */
+        //File[] file = files.listFiles((dir,name)->new File(dir,name).isDirectory()||name.endsWith(".mp4"));
+
+        File[] file = files.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return new File(dir,name).isDirectory() || name.endsWith("mp4");
+            }
+        });
+        for (File file1 : file) {
+            if(file1.isDirectory()){
+                getAllFiles(file1);
+            }else{
+                System.out.println(file1.getName());
+            }
+        }
+    }
+}
+```
+
+# IO流
+
+包：`java.io`
+
+![image-20210923163628932](java_notes.assets/image-20210923163628932.png)
+
+**一切皆为字节**：字节流可以传输任意文件数据
+
+## OutputStream:
+
+字节输出流
+
+`java.io.OutputStream`：此抽象类是表示输出字节流的所有类的超类
+
+定义了一些子类共性的成员方法：
+
+​	`public void close()`：关闭此输出流并释放与此流关联的任何系统资源
+
+​	`public void flush()`：刷新此输出流并强制任何缓冲的输出字节被写出
+
+​	`public void write(byte[] b)`：将b.length个字节从指定的字节数组写入此输出流
+
+​	`public void write(byte[] b,int off,int len)`：从指定的字节数组写入len字节，从偏移量off开始输出到此输出流
+
+### FileOutputStream子类
+
+作用：
+
+​	把内存中的数据写入硬盘文件中
+
+**简单构造方法**：
+
+​	`FileOutputStream(String name)`：创建一个向具有指定名称的文件中写入数据的输出文件流
+
+​	`FileOutputStream(File file)`：创建一个向指定File对象表示的文件中写入数据的文件输出流
+
+参数：
+
+​	`String name`：目的地是一个文件的路径
+
+​	`File file`：目的地是一个文件
+
+构造方法的作用：
+	1.创建一个FileOutputStream对象
+
+​	2.会根据构造方法中传递的文件/文件路径，创建一个空文件
+
+​	3.会把FileOutputStream对象指向创建好的文件
+
+**写入数据的原理：**
+
+​	java程序--->JVM虚拟机--->OS(操作系统)--->OS调用写数据的方法--->将数据写入文件中
+
+**使用步骤：**
+
+​	1.创建FileOutputStream对象，构造方法中传入写入数据的目的地
+
+​	2.调用FileOutputStream对象中的方法write，把数据写入文件
+
+​	3.释放资源（流使用会占用一定内存，使用完毕要把内存清空，提高程序的效率）
+
+```java
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+public class IOLearn {
+    public static void main(String[] args) throws IOException {
+        FileOutputStream fos = new FileOutputStream("D:\\Java\\a.txt");
+        //写入单个字符
+        fos.write(97);
+		/*
+		注意：
+			写数据时，会把10进制数字97转换为二进制数字1100001,
+			任意的文本编辑器在打开文件时，都会查询编码表，把字节转换为字符表示
+			0-127：查询ASCII表
+				97--->a
+			其他值：
+				查询系统默认码表（中文系统GBK）
+		*/ 
+        
+        //写入多个字符 
+        byte[] bytes={65,66,67,68,69};
+        fos.write(bytes);//写入多个字节
+        fos.write(bytes,1,2);//从位置1开始，写2个字节
+        /*
+        注意：
+        	如果写的第一个字节是正数（0-127）,那么显示的时候会查询ASCII表
+        	如果写的第一个字节是负数，那第一个字节和第二个字节会组成一个中文显示，查询系统默认码表（GBK）
+        */
+        
+        //写入字符串，使用String类中的方法把字符串转换为字节数组
+        byte[] bytes2 = "你好".getBytes();
+        sout(Arrays.toStrinng(bytes2));
+        fos.write(bytes2);
+        /*
+        UTF-8:	3个字节表示一个中文
+        GNK:	2个字节表示一个中文
+        */
+        
+        fos.close();
+    }
+
+}
+/*
+注意：
+	写数据时，会把10进制数字97转换为二进制数字1100001,
+	任意的文本编辑器在打开文件时，都会查询编码表，把字节转换为字符表示
+	0-127：查询ASCII表
+		97--->a
+	其他值：
+		查询系统默认码表（中文系统GBK）
+*/
+```
+
+**追加/续写构造方法**
+
+​	`FileOutputStream(String name,boolean append)`：创建一个向具有指定name的文件中写入数据的文件输出流
+
+​	`FileOutputStream(File file,boolean append)`：创建一个向指定File对象表示的文件中写入数据的文件输出流
+
+参数：
+
+​	String name,File file：写入数据的目的地
+
+​	boolean append：追加写开关
+
+​			true：创建对象不会覆盖原文件，继续在文件末尾追加写数据
+
+​			false：创建一个新文件，覆盖源文件
+
+写入时换行：写换行符号
+
+​		windows:	\r\n
+
+​		linux:	/n
+
+​		mac:	/r														
+
+```java
+public class IOLearn {
+    public static void main(String[] args) throws IOException {
+        FileOutputStream fos = new FileOutputStream("D:\\Java\\a.txt",true);
+        for (int i = 0; i < 10; i++) {
+            fos.write("hello".getBytes(StandardCharsets.UTF_8));
+            fos.write("\r\n".getBytes(StandardCharsets.UTF_8));
+        }
+        fos.close();
+    }
+
+}
+```
+
+## InputStream
+
+字节输入流
+
+`java.io.InputStream`：该抽象类是表示字节输入流的所有类的超类
+
+定义了字节输入流的基本共性功能方法：
+
+​	`public void close()`:	关闭此输入流并释放与流相关的任何系统资源
+
+​	`public abstract int read()`:	从输入流读取数据的下一个字节
+
+​	`public int read(byte[0] b)`:	从输入流中读取一些字节数，并存储到字节数组b中
+
+### FileInputStream子类
+
+作用：将硬盘中的数据读取到内存中使用
+
+构造方法：
+
+​	`FileInputStream(String name)`
+
+​	`FileInputStream(File file)`
+
+构造方法作用：
+
+​	1.会创建一个FileInputStream对象
+
+​	2.会把FileInputStream对象指定构造方法中要读取的文件
+
+读取数据原理：
+
+​	java程序--->JVM--->OS--->OS读取数据的方法--->读取文件
+
+字节输入流使用步骤：
+
+​	1.创建FileInputStream对象，构造方法中绑定要读取的数据源
+
+​	2.使用FileInputStream对象中的方法read，读取文件
+
+​	3.释放资源
+
+
+
+```java
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
+public class IOLearn {
+    public static void main(String[] args) throws IOException {
+        FileInputStream fis = new FileInputStream("D:\\Java\\a.txt");
+        
+        //读取单个字节：public abstract int read() 
+        int len=0;
+        //read()方法一次只能读一个字节，读完一个字节指针向后移一位，结束时为-1，因此需要循环读，下面基本是固定写法
+        while((len = fis.read())!=-1){
+            System.out.println(len);
+        }
+        
+        //读取多个字节:public int read(byte[] b)
+        /*
+        返回值int代表每次读取的有效字节数
+        byte[] b 作用：
+        	缓冲作用，从输入流中读取一定数量的字节，存储在缓冲区数组b中
+        	长度一般定义为1024或1024的整数倍
+        */
+        int len = 0;
+        byte[] bytes = new byte[1024];
+        while((len=fis.read(bytes))!=-1){
+            /*
+            String有两构造方法：
+            	String(byte[] bytes]:把字节数组转换为字符串
+            	String(byte[],int offset,int length):把字节数组的一部分转换为字符串，offet:数组的开始索引，lenngth:转换				的字节数
+            */
+            System.out.println(new String(bytes,0,len));
+        }
+        
+        fis.close();
+    }
+
+}
+```
+
+原理图：
+
+![image-20210923212145212](java_notes.assets/image-20210923212145212.png)
+
+​	
+
+![image-20210923213815008](java_notes.assets/image-20210923213815008.png)
+
+## 文件复制练习
+
+```java
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+public class FileCopy {
+    public static void main(String[] args) throws IOException {
+        FileInputStream fis = new FileInputStream("C:\\Users\\25374\\Desktop\\公务员考试.jpg");
+        FileOutputStream fos = new FileOutputStream("D:\\Java\\2.jpg");
+        int len = 0;
+        byte[] bytes = new byte[1024];
+        while((len = fis.read(bytes))!=-1){
+            fos.write(bytes,0,len);
+        }
+        fos.close();
+        fis.close();
+    }
+}
+```
 
