@@ -3248,7 +3248,7 @@ public class files {
 
 **一切皆为字节**：字节流可以传输任意文件数据
 
-## OutputStream:
+## 字节输出流：OutputStream
 
 字节输出流
 
@@ -3392,7 +3392,7 @@ public class IOLearn {
 }
 ```
 
-## InputStream
+## 字节输入流：InputStream
 
 字节输入流
 
@@ -3402,9 +3402,9 @@ public class IOLearn {
 
 ​	`public void close()`:	关闭此输入流并释放与流相关的任何系统资源
 
-​	`public abstract int read()`:	从输入流读取数据的下一个字节
+​	`public abstract int read()`:	从输入流读取数据的下一个字节(**返回值为读取的字节的10进制表示**)
 
-​	`public int read(byte[0] b)`:	从输入流中读取一些字节数，并存储到字节数组b中
+​	`public int read(byte[0] b)`:	从输入流中读取一些字节数，并存储到字节数组b中（**返回值为读取的有效字节数**）
 
 ### FileInputStream子类
 
@@ -3463,7 +3463,7 @@ public class IOLearn {
         byte[] bytes = new byte[1024];
         while((len=fis.read(bytes))!=-1){
             /*
-            String有两构造方法：
+            String两构造方法：
             	String(byte[] bytes]:把字节数组转换为字符串
             	String(byte[],int offset,int length):把字节数组的一部分转换为字符串，offet:数组的开始索引，lenngth:转换				的字节数
             */
@@ -3506,4 +3506,497 @@ public class FileCopy {
     }
 }
 ```
+
+## 字节流读取中文的问题
+
+中文：
+
+​	GBK编码：每个汉字占2个字节
+
+​	UTF-8编码：每个汉字占3个字节
+
+假如文件中有两个汉字 “你好” ，使用UTF-8编码，当使用read()函数读取字节流后，会有6个字节的二进制数字，当使用char强转时，就会发生错误，转为乱码。
+
+因此，java提供了一些字符流类，以字符为单位读写数据，专门用于处理文本文件
+
+## 字符输入流：Reader
+
+`java.io.Reader`：字符输入流，是字符输入流的最顶层父类，定义了一些共性成员方法，是一个抽象类
+
+共性成员方法：
+
+​	`int read()`：读取单个字符
+
+​	`int read(char[] cbuf)`：一次读取多个字符，将字符读入数组
+
+​	`void close()`：关闭该流并释放与之关联的所有资源
+
+### FileReader
+
+`java.io.FileReader extends InputStreamReader extends Reader`
+
+作用：把硬盘文件中的数据以字符的方式读取到内存中
+
+* 构造方法：
+
+  ​	`FileReader(String fileName)`
+
+  ​	`FileReader(File file)`
+
+  ​	参数：读取文件的数据源
+
+  ​			String fileName:文件路径
+
+  ​			File file:一个文件
+
+* 构造方法的作用：
+
+  ​	1.创建一个FileReader对象
+
+  ​	2.会把FileReader对象指向要读取的文件
+
+```java
+import java.io.FileReader;
+import java.io.IOException;
+
+public class filereader {
+    public static void main(String[] args) throws IOException {
+        FileReader fr = new FileReader("D:\\Java\\a.txt");
+        
+        //一次读取单个字符
+        int len;
+        while((len=fr.read())!=-1){
+            System.out.println(len);
+            System.out.println((char)len);
+        }
+ 
+        //一次读取多个字符
+        /*
+        String两个构造方法：
+        	String(char[] value)
+        	String(char[] value,int offset,int len)
+        */
+        int len;
+        char[] cs = new char[1024];
+        while((len=fr.read(cs))!=-1){
+            System.out.println(new String(cs,0,len));
+        }
+        fr.close();
+    }
+}
+```
+
+## 字符输出流：Writer
+
+`java.io.Writer`：字符输出流，是所有字符输出流的最顶层父类，是一个抽象类
+
+共性成员方法：
+
+​	`void write(int c)`:写入单个字符
+
+​	`void write(char[] cbuf)`:写入字符数组
+
+​	`abstract void write(char[] cbuf,int off,int len)`：写入字符数组的某一部分，off数组的开始索引，len写的字符个数
+
+​	`void write(String str)`:写入字符串
+
+​	`void write(Strng str,int off,int len)`：写入字符串的某一部分，off字符串开始索引，len写的字符个数
+
+​	`void flush()`：刷新该流的缓冲
+
+​	`void close()`:关闭此流，但要先刷新它
+
+### FileWriter
+
+`java.io.FileWriter extends OutputStreamWriter extends Writer`:
+
+文件字符输出流
+
+作用：把内存中的字符数据写入文件中
+
+构造方法：
+
+​	`FileWriter(File file)`
+
+​	`FileWriter(String fileName)`
+
+​	作用：
+
+​		1.创建FileWriter对象
+
+​		2.根据构造方法中传递的文件路径，创建文件
+
+​		3.将FileWriter对象指向创建好的文件
+
+字符输出流的使用步骤：
+
+​	1.创建FileWriter对象，构造方法中绑定要写入数据的目的地
+
+​	2.使用FileWriter中的方法write,把数据写入到内存缓冲区中（字符转换为字节的过程）
+
+​	3.使用FileWriter中的方法flush，把内存缓冲区中的数据 ，刷新到文件中
+
+​	4.释放资源（会先把内存缓冲区中的数据刷新到文件中）		
+
+```java
+import java.io.FileWriter;
+import java.io.IOException;
+
+public class filewriter {
+    public static void main(String[] args) throws IOException {
+        FileWriter fw = new FileWriter("D:\\Java\\a.txt",true);
+        
+        //写入单个字符
+        fw.write(98);
+        
+        //写入字符数组
+        char[] cbuf = {'a','b','c','d','e'};
+        fw.write(cbuf);
+            
+        //写字符数组的一部分
+        fw.write(cbuf,0,3);
+        
+        //写字符串
+        fw.write("you are the best");
+        
+        //写字符串的一部分
+        fw.write("hello world",0,5);
+        
+        fw.flush();//可以不写 close方法会先刷新再关闭
+        fw.close();
+    }
+}
+```
+
+**续写和换行**
+
+`FileWriter(String fileName,boolean append)`
+
+`FileWriter(File file,boolean append)`
+
+换行：
+
+​	Windows:	\r\n
+
+​	Linux:	/n
+
+​	Mac:	/r
+
+## IO异常处理
+
+实际开发中，不能一直把异常抛出，建议使用try...catch...finally代码块处理异常
+
+```java
+import java.io.FileWriter;
+import java.io.IOException;
+
+public class filewriter {
+    public static void main(String[] args){
+        FileWriter fw = null;
+        try{
+            fw = new FileWriter("E:\\Java\\c.txt");
+            fw.write("i need a iphone12");
+        }catch (IOException e){
+            System.out.println(e);
+        }finally{
+            if(fw!=null){
+                try{
+                    fw.close();
+                }catch (IOException e){
+                    System.out.println(e);
+                }
+            }
+
+
+        }
+
+    }
+}
+```
+
+```java
+/*
+上面语句过于复杂
+
+JDK7的新特性：
+	在try后面可以增加一个（），在括号中可以定义流对象，这个流对象的作用域就在try中有效，try语句执行完，自动释放流对象，不用写finally再释放流对象。
+*/
+import java.io.FileWriter;
+import java.io.IOException;
+
+public class filewriter {
+    public static void main(String[] args){
+        try(FileWriter fw = new FileWriter("D:\\Java\\a.txt")){
+            fw.write("i need 5300");
+        }catch (IOException E){
+            System.out.println(E);
+        }
+
+    }
+}
+
+```
+
+# 属性集
+
+Hashtable是最早的双列集合，已经被Hashmap所取代，但是Hashtable有一个子类Properties至今仍在使用，因为其实唯一一个与IO流相结合的集合
+
+`java.util.Properties extends Hashtable<k,v> impements Map<k,v>`
+
+Properties类表示了一个持久的属性集，Properties可保存在流中，或从流中加载
+
+属性列表中每个键和对应值都是一个字符串
+
+​	Properties集合是一个双列集合，key和value默认都是字符串
+
+Properties集合操作字符串的特有方法：
+	`Object setProperty(String key,String value)`调用Hashtable的方法put
+
+​	`String getProterty(Stringn key)`:通过key找到value，相当于Map集合中的get(key)方法
+
+​	`Set<String> stringPropertyNames()`:返回此属性列表的键集，相当于Map集合的keySet方法
+
+```java
+import java.util.Properties;
+import java.util.Set;
+
+public class properties_learn {
+    public static void main(String[] args) {
+        Properties pr = new Properties();
+        pr.setProperty("刘亦菲","16");
+        pr.setProperty("左小青","18");
+        pr.setProperty("迪丽热巴","19");
+
+        Set<String> key = pr.stringPropertyNames();
+        for (String s : key) {
+            System.out.println(s+" "+pr.getProperty(s));
+        }
+    }
+}
+```
+
+Properties集合是唯一和IO流相结合的集合
+
+​	可使用Properties集合中的方法store，把集合中的临时数据持久化写入硬盘存储
+
+​		`void store(OutputStream out,String commens)`
+
+​		`void store(Writer writer,String comments)`
+
+​		参数：
+
+​			`OutputStream out`：字节输出流，不能写入中文
+
+​			`Writer writer`：字符输出流，可以写入中文
+
+​			`String commens`：注释，用来解释说明保存的文件是做什么的
+
+​											不能使用中文，会产生乱码，默认Unicode编码
+
+​											一般使用""空字符串
+
+​		可使用Properties集合中的方法load，把硬盘中保存的文件（键值对）读取到集合中使用
+
+​				`void load(InputStream inStream)`
+
+​				`void load(Reader reader)`
+
+​				参数：
+
+​						`InputStream inStream`:字节输入流，不能读取含有中文的键值对
+
+​						`Reader reader`：字符输入流，可以读取中文键值对
+
+```java
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Properties;
+import java.util.Set;
+
+public class properties_learn {
+    public static void main(String[] args) throws IOException {
+        Properties pr = new Properties();
+        pr.setProperty("刘亦菲","16");
+        pr.setProperty("左小青","18");
+        pr.setProperty("迪丽热巴","19");
+        
+		//键值对默认符号为=,空格也可以
+        pr.store(new FileWriter("D:\\hello1.txt"),"");//字符流，可以写中文
+        pr.store(new FileOutputStream("D:\\hello2.txt"),"");//字节流，乱码
+        
+    }
+}
+```
+
+```java
+import java.io.*;
+import java.util.Properties;
+import java.util.Set;
+
+public class properties_learn {
+    public static void main(String[] args) throws IOException {
+        Properties pr = new Properties();
+
+        pr.load(new FileReader("D:\\hello.txt"));
+        Set<String> set = pr.stringPropertyNames();
+        for (String s : set) {
+            System.out.println(s+"="+pr.getProperty(s));
+        }
+    }
+}
+```
+
+# 缓冲流
+
+基本字节输入流：一次读一个字节
+
+字节缓冲输入流：增加了缓冲区，一次可以读多个字节，效率更高
+
+* 字节缓冲流：`BufferedInputStream`,`BufferedOutputStream`
+* 字符缓冲流：`BufferReader`,`BufferWriter`
+
+## 字节缓冲输出流：BufferedOutputStream
+
+`BufferdeOutputStream extends OutputStream`
+
+因此继承自父类的公共方法可以直接使用：(ctrl+左键跳转连接)
+
+* [公共方法](#字节输出流：OutputStream)
+
+* 构造方法：
+
+  ​	`BufferedOutputStream(OutputStream out)`
+
+  ​	`BufferedOutputStream(OutputStream out,int size)`
+
+  参数：
+
+  ​	OutputStream out:	创建一个新的缓冲输出流，将具有默认缓冲区大小的数据写入指定的底层输出流
+
+  ​										可以用FileOutputStream
+
+  ​	int size:	创建一个新的缓冲输出流，将具有size大小的缓冲区的数据写入指定的底层输出流
+
+```java
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+
+public class bufferedoutputstream {
+    public static void main(String[] args) throws IOException {
+        FileOutputStream fos = new FileOutputStream("D:\\a.txt");
+
+        BufferedOutputStream bos = new BufferedOutputStream(fos);
+        bos.write("不说脏话，干净阳光".getBytes());
+        bos.close();
+    }
+}
+```
+
+## 字节缓冲输入流：BufferedInputStream
+
+`java.io.BufferedInputStream extends InputStream`
+
+继承自父类的共性方法：
+
+* [公共方法](#字节输入流：InputStream)
+
+* 构造方法：
+
+  `BufferedInputStream(InputStream in)`
+
+  `BufferedInputStream(InputStream in,int size)`
+
+```java
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+
+public class bufferecinputstream {
+    public static void main(String[] args) throws IOException {
+        FileInputStream fis = new FileInputStream("D:\\a.txt");
+        BufferedInputStream bis = new BufferedInputStream(fis);
+        int content;
+        byte[] by = new byte[1024];
+        while((content=bis.read(by))!=-1){
+            System.out.println(new String(by,0,content));
+        }
+        bis.close();
+    }
+}
+```
+
+## 字符缓冲输出流：BufferedWriter
+
+`java.io.BufferedWriter extends Writer`
+
+继承自父类的公共方法：
+
+* [公共方法](#字符输出流：Writer)
+
+* 构造方法：
+
+  `BufferedWriter(Writer out)`
+
+  `BUfferedWriter(Writer out,int size)`
+
+* 特有成员方法：
+
+  `void newLine()`:	写入一个行分隔符，不同操作系统会写入不同行分隔符
+
+## 字符缓冲输入流：BufferedReader
+
+`java.io.BUfferedReader extends Reader`
+
+继承自父类的公共方法：
+
+* [公共方法](#字符输入流：Reader)
+
+* 构造方法：
+
+  `BUfferedReader(Reader in)`
+
+  `BufferedReader(Reader in,int size)`
+
+* 特有的成员方法：
+
+  `String readLine()`:	读取一个文本行
+
+  行终止符号：换行（‘\n’）回车（'\r'）或回车后直接跟着换行
+
+  返回值：包含行内容的字符串，不包含任何终止符，如果达到流末尾，返回null
+
+  
+
+```java
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+
+public class bufferedReader {
+    public static void main(String[] args) throws IOException {
+        FileReader fr = new FileReader("D:\\B.txt");
+        BufferedReader br = new BufferedReader(fr);
+        String line;
+        while((line = br.readLine())!=null){
+            System.out.println(line);
+        }
+        br.close();
+    }
+}
+```
+
+# 字符编码和字符集
+
+* 字符编码（Character Encoding）:一套自然语言的字符和二进制数之间的对应规则
+
+* 字符集（Charset）：也叫编码表，是一个系统支持的所有字符的集合，包括各国文字，标点符号，图形符号，数字等
+
+  一套字符集至少有一套字符编码，常见字符集：ASCII	GBK	Unicode(包含UTF8	UTF16	UTF32编码)
+
+* 使用FileReader读取文件，默认使用IDE的UTF8编码，但是Windows的中文系统默认使用GBK编码，因此读GBK编码格式的文件时会出现乱码。
 
