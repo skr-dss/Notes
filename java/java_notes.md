@@ -276,7 +276,7 @@ public class Zi extends Fu{
         int num = 20;
         sout(num);	//20,局部变量
         sout(this.num);	//10,本类的成员变量
-        sout(super.num);	//30，父类的成员变量
+        sout(super.num );	//30，父类的成员变量
     }
 }
 ```
@@ -900,6 +900,10 @@ System.out.println(Arrays.toString(dest));
   	
   注意：Character类没有对应的pase方法，只有另外7类有
 
+## Integer常用方法
+
+`Integer.bitCount(int n)`:返回n的二进制所含1的个数
+
 # Collection集合
 
 ## 单列集合体系结构
@@ -1258,6 +1262,18 @@ List的数组实现，底层为数组
 
 无序，无索引，不允许存储重复元素
 
+**常用方法：**
+
+1.添加元素可以使用 add() 方法:
+
+2.判断元素是否存在于集合当中contains() 方法
+
+3.删除集合中的元素remove() 方法
+
+4.删除集合中所有元素可以使用 clear 方法
+
+5.计算 HashSet 中的元素数量可以使用 size() 方法
+
 **哈希表**
 
 `java.lang`包中的`Object`类中方法：`int hashCode()`返回对象的哈希码值
@@ -1484,6 +1500,8 @@ Properties集合是唯一一个和*IO*流相结合的集合
 `public V remove(Object key)`:删除键值对，无则返回null
 
 `public boolean containValue(Object key)`:如果包含指定键的映射，返回true
+
+`public V getOrDefalut(K key,V defaultvalue)`:返回key对应的value值，如果不存在，则返回defaultvalue
 
 ```java
 HashMap<String,Integer> map = new HashMap<>();
@@ -2324,25 +2342,29 @@ public class MyThread extends Thread{
 
 多线程访问共享数据，会产生混乱，比如多个售票窗口都在卖相同的100张票
 
+![image-20211229202351548](java_notes.assets/image-20211229202351548.png)
+
 ```java
 /*
 下面代码就会出现问题，因为所有线程共享了一个tickets，如果每个线程都使用一个Runnable_Impl就不会有问题
 */
 
 public class Runnable_Impl implements Runnable{
-    int ticktes =20;
+    int ticktes =1;
     @Override
     public void run() {
-        for (int i = 0; i < ticktes; i++) {
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        while(true){
+            if(tickets>0){
+                try {
+                	Thread.sleep(10);
+            	} catch (InterruptedException e) {
+                	e.printStackTrace();
+           	 	}
             }
             System.out.println(Thread.currentThread().getName()+"正在卖第"+i+"张票");
+                ticktes--;
         }
-
-    }
+            
 }
 
 public class Main_thread {
@@ -3447,7 +3469,7 @@ public class IOLearn {
         
         //读取单个字节：public abstract int read() 
         int len=0;
-        //read()方法一次只能读一个字节，读完一个字节指针向后移一位，结束时为-1，因此需要循环读，下面基本是固定写法
+        //read()方法一次只能读一个字节，读完一个字节指针向后移一位，结束时为-1，因此需要循环读，下面是固定写法
         while((len = fis.read())!=-1){
             System.out.println(len);
         }
@@ -3990,7 +4012,7 @@ public class bufferedReader {
 }
 ```
 
-# 字符编码和字符集
+# 字符编码和字符集，转换流
 
 * 字符编码（Character Encoding）:一套自然语言的字符和二进制数之间的对应规则
 
@@ -3998,5 +4020,119 @@ public class bufferedReader {
 
   一套字符集至少有一套字符编码，常见字符集：ASCII	GBK	Unicode(包含UTF8	UTF16	UTF32编码)
 
-* 使用FileReader读取文件，默认使用IDE的UTF8编码，但是Windows的中文系统默认使用GBK编码，因此读GBK编码格式的文件时会出现乱码。
+* 使用FileReader读取文件，**默认使用IDE的UTF8编码**，但是Windows的中文系统默认使用GBK编码，因此读GBK编码格式的文件时会出现乱码。(ANSI编码就是GBK编码)
+
+* FileReader虽然是字符流，但是不同的字符集之间依然会出现乱码
+
+`FileReader`类：
+
+​		用来读取字符文件的便捷类。此类的构造方法假定默认字符编码和默认字节缓冲区大小都是适当的。**要自己指定这些值**，可以先在 		FileInputStream 上构造一个 **InputStreamReader**。
+
+​		`FileReader` 用于读取字符流。要读取原始字节流，请考虑使用 `FileInputStream`。
+
+`FileWriter`类：
+
+​	用来写入字符文件的便捷类。此类的构造方法假定默认字符编码和默认字节缓冲区大小都是可接受的。**要自己指定这些值**，可以先在 	FileOutputStream  上构造一个 **OutputStreamWriter**。
+
+​	`FileWriter` 用于写入字符流。要写入原始字节流，请考虑使用 `FileOutputStream`
+
+**实际上FileReader类只干了一件事，查询默认编码表（IDE为UTF-8编码表），将字节转换为字符，读取硬盘上的字节使用的是FileInputStream,要指定字符集，使用InputStreamReader;**
+
+**FileWriter同理,使用OutputStreamWriter;**
+
+# 转换流OutputStreamWriter
+
+`java.io.OutputStreamWriter extends Writer`
+
+OutputStreamWriter 是字符流通向字节流的桥梁：可使用指定的 `charset`] 将要写入流中的字符编码成字节。它使用的字符集可以由名称指定或显式给定，否则将接受平台默认的字符集。
+
+* [公共方法](#字符输出流：Writer)
+
+* 构造方法：
+
+  `OutputStreamWriter (OutputStream out)`        创建使用默认字符编码的 OutputStreamWriter。
+
+  `OutputStreamWriter (OutputStream out,  String charsetName)`        创建使用指定字符集的 OutputStreamWriter。
+
+```java
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+
+public class outputstreamwriter_learn {
+    public static void main(String[] args) throws IOException {
+        gbk_write();
+    }
+    private static void gbk_write() throws IOException {
+        OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream("gbk_write.txt"),"gbk");
+        osw.write("你好");
+        osw.flush();
+        osw.close();
+    }
+}
+```
+
+# 转换流InputStreamReader
+
+`java.io.InputStreamReader extends Reader`
+
+InputStreamReader 是字节流通向字符流的桥梁：它使用指定的 `charset`读取字节并将其解码为字符。它使用的字符集可以由名称指定或显式给定，或者可以接受平台默认的字符集。
+
+* [公共方法](#字符输出流：Writer)
+
+* 构造方法：
+
+  `InputStreamReader(InputStream in)`        创建一个使用默认字符集的 InputStreamReader。
+
+  `InputStreamReader(InputStream in, String charsetName)`        创建使用指定字符集的 InputStreamReader。
+
+注意：构造方法中指定的字符编码要和文件的编码相同，否则发生乱码
+
+```java
+import java.io.*;
+
+public class inputstreamreader_learn {
+    public static void main(String[] args) throws IOException {
+        gbk_reader();
+    }
+    private static void gbk_reader() throws IOException {
+        InputStreamReader isr = new InputStreamReader(new FileInputStream("d://gbk_write.txt"),"gbk");
+        int len;
+        while ((len = isr.read())!=-1) {
+            System.out.println((char)len);
+        }
+    }
+}
+```
+
+# 序列化与反序列化
+
+序列化：将**对象**存储至文件中
+
+反序列化：将**对象**从文件中读取出来
+
+
+
+序列化和反序列化时，**对象类**必须要先实现***Serializable***接口，启用序列化功能，否则不能序列化或反序列化
+
+## ObjectOutputStream
+
+```java
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+
+public class objoutputstream implements Serializable {
+    public static void main(String[] args) throws IOException {
+        ObjectOutputStream opt = new ObjectOutputStream(new FileOutputStream("d:\\objopts.txt"));
+        opt.writeObject(new Person("蔡琳",18));
+        opt.close();
+
+    }
+}
+```
+
+## ObjectInputStream
 
